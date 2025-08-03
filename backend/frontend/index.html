@@ -1,0 +1,90 @@
+
+<!-- frontend/index.html -->
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Minhas Tarefas</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <h2>Minhas Tarefas</h2>
+    <form id="formTarefa">
+      <input type="text" id="novaTarefa" placeholder="Digite uma nova tarefa" required />
+      <button type="submit">Adicionar</button>
+    </form>
+    <ul id="listaTarefas"></ul>
+    <button id="sair">Sair</button>
+  </div>
+  <script>
+    const token = localStorage.getItem("token");
+    if (!token) window.location.href = "login.html";
+
+    const lista = document.getElementById("listaTarefas");
+    const form = document.getElementById("formTarefa");
+    const input = document.getElementById("novaTarefa");
+
+    async function carregarTarefas() {
+      const res = await fetch("http://localhost:3000/api/tasks", {
+        headers: { Authorization: token }
+      });
+      const tarefas = await res.json();
+      lista.innerHTML = "";
+      tarefas.forEach(t => {
+        const li = document.createElement("li");
+        li.textContent = t.texto;
+        if (t.concluida) li.classList.add("concluida");
+        li.onclick = async () => {
+          await fetch(`http://localhost:3000/api/tasks/${t._id}`, {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: token
+            },
+            body: JSON.stringify({ concluida: !t.concluida })
+          });
+          carregarTarefas();
+        };
+        const del = document.createElement("button");
+        del.textContent = "🗑";
+        del.onclick = async (e) => {
+          e.stopPropagation();
+          await fetch(`http://localhost:3000/api/tasks/${t._id}`, {
+            method: "DELETE",
+            headers: { Authorization: token }
+          });
+          carregarTarefas();
+        };
+        li.appendChild(del);
+        lista.appendChild(li);
+      });
+    }
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const texto = input.value;
+      await fetch("http://localhost:3000/api/tasks", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: token
+        },
+        body: JSON.stringify({ texto })
+      });
+      input.value = "";
+      carregarTarefas();
+    });
+
+    document.getElementById("sair").onclick = () => {
+      localStorage.removeItem("token");
+      window.location.href = "login.html";
+    };
+
+    carregarTarefas();
+  </script>
+</body>
+</html>
+
+
