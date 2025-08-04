@@ -37,5 +37,8 @@ Aplicativo de tarefas desenvolvido com Node.js, Express, MongoDB, HTML, CSS e Ja
 ### Pré-requisitos
 - Node.js e npm instalados
 - MongoDB Atlas ou local
-.com/GabriellPRO/app-tarefas.git
+
+### Clonando o projeto
+```bash
+git clone https://github.com/GabriellPRO/app-tarefas.git
 cd app-tarefas
